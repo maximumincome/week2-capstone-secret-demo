@@ -1,0 +1,87 @@
+
+
+
+IAM Policy Document: Three-Tier Web Application (Google Cloud Platform)
+
+1. Purpose
+
+This document defines the Identity and Access Management (IAM) policy for a hypothetical three-tier web application deployed on Google Cloud Platform (GCP). The design follows the principle of least privilege by granting each identity only the permissions required to perform its responsibilities.
+
+2. Application Architecture
+
+Users
+  |
+External Load Balancer
+  |
+Frontend (Presentation Tier)
+  |
+Backend API (Application Tier)
+  |
+Database (Data Tier)
+
+Supporting Services:
+• Cloud Storage
+• Cloud Logging
+• Cloud Monitoring
+• IAM
+
+3. IAM Principals and Roles
+
+3.1 Cloud Administrator
+Role(s): roles/owner
+Responsibilities: Project configuration, billing, IAM administration, and emergency operations.
+Why no broader role was appropriate: The Owner role is the highest project-level role and is limited to a small number of trusted administrators.
+
+
+3.2 Frontend Service Account
+Role(s): roles/storage.objectViewer
+Responsibilities: Reads static assets such as images, CSS, and JavaScript files from Cloud Storage.
+Why no broader role was appropriate: It only requires read access. Storage Admin would allow deleting buckets and changing permissions.
+
+
+3.3 Backend API Service Account
+Role(s): roles/cloudsql.client
+roles/storage.objectCreator
+Responsibilities: Connects to Cloud SQL and uploads user-generated content to Cloud Storage.
+Why no broader role was appropriate: It does not need database administration or storage administration permissions.
+
+
+3.4 Database Service Account
+Role(s): roles/cloudsql.client
+Responsibilities: Provides controlled connectivity to Cloud SQL.
+Why no broader role was appropriate: Database administration remains separated from application workloads.
+
+
+3.5 Security Monitoring Account
+Role(s): roles/logging.viewer
+Responsibilities: Views logs for monitoring and incident investigation.
+Why no broader role was appropriate: Logging Admin permissions are unnecessary because this identity does not manage logging settings.
+
+
+3.6 Developer Account
+Role(s): roles/viewer
+Responsibilities: Views project resources, deployments, and logs.
+Why no broader role was appropriate: Developers should not modify production resources.
+
+
+3.7 CI/CD Pipeline Service Account
+Role(s): roles/container.developer
+
+
+roles/storage.objectViewer
+Responsibilities: Deploys applications and retrieves deployment artifacts.
+Why no broader role was appropriate: Cluster-wide administrative permissions are unnecessary for deployment tasks.
+
+
+4. Security Principles Applied
+•	Least Privilege: Every identity receives only the minimum permissions required.
+
+•	Separation of Duties: Administrative, development, deployment, and monitoring responsibilities are separated.
+
+•	No Shared Accounts: Every user and workload has a unique identity.
+
+•	Reduced Blast Radius: If one identity is compromised, its permissions are limited.
+
+
+5. Conclusion
+This IAM policy demonstrates a secure, least-privilege design for a three-tier web application on GCP. Each principal has a clearly defined purpose, and no identity is granted permissions beyond what is required.
